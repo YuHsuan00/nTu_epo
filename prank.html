@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>國立臺灣大學 — 學生資訊入口</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: '微軟正黑體', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+    background: #f4f4f4;
+    color: #222;
+    font-size: 14px;
+  }
+  a { color: inherit; text-decoration: none; pointer-events: none; cursor: default; }
+
+  .topbar {
+    background: #5a1018;
+    color: #e8d5c4;
+    font-size: 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.2rem;
+    padding: 4px 2rem;
+  }
+  .topbar span { opacity: 0.85; }
+
+  .navbar {
+    background: #801c27;
+    display: flex;
+    align-items: stretch;
+    padding: 0 1.5rem;
+    height: 56px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding-right: 2rem;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    margin-right: 1rem;
+    white-space: nowrap;
+  }
+  .logo-seal {
+    width: 36px; height: 36px;
+    border: 2px solid rgba(255,255,255,0.7);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: white; flex-shrink: 0;
+  }
+  .nav-links { display: flex; align-items: stretch; flex: 1; }
+  .nav-links span {
+    color: rgba(255,255,255,0.88);
+    font-size: 13px;
+    padding: 0 1.1rem;
+    display: flex; align-items: center;
+    border-bottom: 3px solid transparent;
+  }
+  .nav-links span.active { border-bottom-color: #f0c040; color: white; }
+  .search-box {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 4px;
+    padding: 4px 10px;
+    color: white; font-size: 12px; width: 140px;
+    align-self: center;
+  }
+  .search-box::placeholder { color: rgba(255,255,255,0.5); }
+
+  .breadcrumb {
+    background: white;
+    border-bottom: 1px solid #ddd;
+    padding: 8px 2rem;
+    font-size: 12px; color: #888;
+  }
+  .breadcrumb span { color: #801c27; }
+
+  .main {
+    max-width: 1100px;
+    margin: 1.5rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 15px; font-weight: 700; color: #801c27;
+    border-left: 4px solid #801c27;
+    padding-left: 0.6rem; margin-bottom: 1rem;
+  }
+  .card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .news-list { list-style: none; }
+  .news-list li {
+    display: flex; gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 13px; align-items: flex-start;
+  }
+  .news-list li:last-child { border-bottom: none; }
+  .news-date { color: #888; white-space: nowrap; font-size: 12px; min-width: 72px; }
+  .news-tag {
+    font-size: 11px; background: #801c27; color: white;
+    padding: 1px 6px; border-radius: 2px; white-space: nowrap; height: fit-content;
+  }
+  .news-tag.green { background: #2a7a2a; }
+  .news-tag.blue  { background: #1a4f8c; }
+
+  .notice-box {
+    background: #fff8e1; border: 1px solid #f0c040;
+    border-radius: 4px; padding: 0.9rem 1.1rem;
+    font-size: 13px; line-height: 1.9; margin-bottom: 1rem; color: #5a4200;
+  }
+  .notice-box strong { color: #801c27; }
+
+  .portal-btn {
+    display: inline-block; background: #801c27; color: white;
+    border: none; border-radius: 4px; padding: 9px 22px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: inherit; margin-top: 0.5rem;
+  }
+  .portal-btn:hover { background: #6a1520; }
+  .portal-btn.ok { background: #2a7a2a; cursor: default; }
+  .portal-btn.err { background: #b03020; cursor: default; }
+
+  .sidebar .card { padding: 1rem 1.2rem; }
+  .quick-links { list-style: none; }
+  .quick-links li {
+    padding: 0.45rem 0; border-bottom: 1px solid #eee;
+    font-size: 13px; color: #444;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .quick-links li:last-child { border-bottom: none; }
+  .quick-links li::before { content: '›'; color: #801c27; font-weight: bold; }
+
+  .calendar-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 700; margin-bottom: 0.7rem; color: #555;
+  }
+  .cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px; font-size: 11px; text-align: center;
+  }
+  .cal-grid .day-name { color: #888; padding: 2px 0; }
+  .cal-grid .day { padding: 3px 0; border-radius: 2px; }
+  .cal-grid .today { background: #801c27; color: white; border-radius: 50%; }
+  .cal-grid .has-event { color: #801c27; font-weight: 700; }
+  .cal-grid .dim { color: #ccc; }
+
+  footer {
+    background: #801c27; color: rgba(255,255,255,0.75);
+    font-size: 12px; text-align: center;
+    padding: 1.2rem 2rem; margin-top: 2rem; line-height: 2;
+  }
+  footer strong { color: white; }
+
+  #dot {
+    position: fixed; bottom: 10px; right: 14px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #aaa; opacity: 0.25;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span>網站導覽</span><span>English</span><span>myNTU</span>
+  <span>學生</span><span>教職員</span><span>校友</span>
+</div>
+
+<nav class="navbar">
+  <div class="logo">
+    <div class="logo-seal">臺大</div>
+    國立臺灣大學
+  </div>
+  <div class="nav-links">
+    <span>認識臺大</span><span>教學</span><span>研究</span>
+    <span>招生</span><span class="active">學生服務</span><span>校園</span>
+  </div>
+  <input class="search-box" type="text" placeholder="搜尋…" readonly>
+</nav>
+
+<div class="breadcrumb">
+  首頁 &rsaquo; <span>學生服務</span> &rsaquo; 課業資訊入口
+</div>
+
+<div class="main">
+  <div class="content">
+
+    <div class="notice-box">
+      <strong>【系統通知】</strong> 學生資訊入口系統維護完成，請重新驗證身分後繼續使用。<br>
+      點擊下方按鈕以啟動音訊驗證模組（需允許麥克風存取以進行環境驗證）。<br>
+      <button class="portal-btn" id="startBtn">啟動驗證模組</button>
+    </div>
+
+    <div class="section-title">最新公告</div>
+    <div class="card">
+      <ul class="news-list">
+        <li><span class="news-date">2026/05/14</span><span class="news-tag">教務處</span><span>114學年度第2學期期末考試時間表已公告，請同學注意應試規定</span></li>
+        <li><span class="news-date">2026/05/12</span><span class="news-tag green">學務處</span><span>校園急救訓練課程開放報名，額滿為止，請儘速至活動報名系統登記</span></li>
+        <li><span class="news-date">2026/05/10</span><span class="news-tag blue">圖書館</span><span>研究資料庫試用通知：SpringerNature 開放全文下載至 6 月 30 日止</span></li>
+        <li><span class="news-date">2026/05/09</span><span class="news-tag">研發處</span><span>國科會大專生研究計畫申請截止日為 5 月 23 日，請洽各系辦確認件數</span></li>
+        <li><span class="news-date">2026/05/07</span><span class="news-tag green">學務處</span><span>宿舍抽籤結果公告，未中籤同學可於 5/20 起參加第二輪候補登記</span></li>
+        <li><span class="news-date">2026/05/05</span><span class="news-tag blue">計資中心</span><span>NTU VPN 系統升級作業通知，5/18 (日) 凌晨 2:00–6:00 暫停服務</span></li>
+        <li><span class="news-date">2026/04/30</span><span class="news-tag">教務處</span><span>113-2 學期成績複查申請開放，受理期間：5/26–6/6，線上申辦</span></li>
+      </ul>
+    </div>
+
+    <div class="section-title">學術活動</div>
+    <div class="card">
+      <ul class="news-list">
+        <li><span class="news-date">05/20 (二)</span><span class="news-tag blue">演講</span><span>【電資學院】Prof. Andrew Ng 專題演講：Large-Scale ML Systems in Production</span></li>
+        <li><span class="news-date">05/22 (四)</span><span class="news-tag">研討會</span><span>2026 臺大經濟學年會 — 投稿摘要截止 5/15，歡迎報名旁聽</span></li>
+        <li><span class="news-date">05/28 (三)</span><span class="news-tag green">工作坊</span><span>AI 工具與學術寫作工作坊（附英文版），圖書館B1多功能室，免費入場</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="card">
+      <div class="section-title">快速連結</div>
+      <ul class="quick-links">
+        <li>課程查詢系統</li><li>選課系統（Web）</li>
+        <li>成績查詢</li><li>宿舍申請</li>
+        <li>圖書館查詢</li><li>校務行政系統</li>
+        <li>myNTU 入口</li><li>學生信箱</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="calendar-header"><span>2026 年 5 月</span></div>
+      <div class="cal-grid">
+        <div class="day-name">日</div><div class="day-name">一</div><div class="day-name">二</div>
+        <div class="day-name">三</div><div class="day-name">四</div><div class="day-name">五</div><div class="day-name">六</div>
+        <div class="day dim">27</div><div class="day dim">28</div><div class="day dim">29</div><div class="day dim">30</div><div class="day dim">1</div><div class="day">2</div><div class="day">3</div>
+        <div class="day">4</div><div class="day">5</div><div class="day">6</div><div class="day">7</div><div class="day">8</div><div class="day has-event">9</div><div class="day">10</div>
+        <div class="day">11</div><div class="day">12</div><div class="day has-event">13</div><div class="day">14</div><div class="day">15</div><div class="day today">16</div><div class="day">17</div>
+        <div class="day">18</div><div class="day">19</div><div class="day has-event">20</div><div class="day">21</div><div class="day">22</div><div class="day has-event">23</div><div class="day">24</div>
+        <div class="day">25</div><div class="day">26</div><div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div><div class="day">31</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">重要日期</div>
+      <ul class="quick-links">
+        <li>5/26–6/6　成績複查申請</li>
+        <li>6/9–6/20　期末考試週</li>
+        <li>6/20　　　學期結束</li>
+        <li>7/1　　　暑期選課開放</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>國立臺灣大學</strong>｜106319 臺北市大安區羅斯福路四段1號<br>
+  © 2026 National Taiwan University. All Rights Reserved.
+</footer>
+
+<div id="dot"></div>
+
+<script>
+(function () {
+  const btn = document.getElementById('startBtn');
+  const dot = document.getElementById('dot');
+
+  const files = ['moan1.mp3','moan2.mp3','moan3.mp3','moan4.mp3','moan5.mp3'];
+  const audios = files.map(f => { const a = new Audio(f); a.preload = 'auto'; return a; });
+
+  let analyser, dataArray;
+  let prevPeak = 0, lastTrigger = 0, running = false;
+
+  const THRESHOLD = 0.12;
+  const COOLDOWN  = 1400;
+
+  function getPeak(buf) {
+    let peak = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const v = Math.abs(buf[i] / 128 - 1);
+      if (v > peak) peak = v;
+    }
+    return peak;
+  }
+
+  function playRandom() {
+    const a = audios[Math.floor(Math.random() * audios.length)];
+    a.currentTime = 0;
+    a.volume = 1.0;
+    a.play().catch(() => {});
+  }
+
+  function loop() {
+    if (!running) return;
+    requestAnimationFrame(loop);
+    analyser.getByteTimeDomainData(dataArray);
+    const peak = getPeak(dataArray);
+    const delta = peak - prevPeak;
+    prevPeak = peak;
+    const now = Date.now();
+    if (delta > THRESHOLD && now - lastTrigger > COOLDOWN) {
+      lastTrigger = now;
+      playRandom();
+    }
+  }
+
+  btn.addEventListener('click', async () => {
+    if (running) return;
+    try {
+      const ctx = new AudioContext();
+      await ctx.resume();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      const src = ctx.createMediaStreamSource(stream);
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+      dataArray = new Uint8Array(analyser.fftSize);
+      src.connect(analyser);
+      running = true;
+      btn.textContent = '驗證成功 ✓';
+      btn.classList.add('ok');
+      dot.style.background = '#34c759';
+      loop();
+    } catch (e) {
+      btn.textContent = '存取失敗，請重試';
+      btn.classList.add('err');
+    }
+  });
+})();
+</script>
+</body>
+</html>
