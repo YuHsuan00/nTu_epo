@@ -279,10 +279,11 @@
   const audios = files.map(f => { const a = new Audio(f); a.preload = 'auto'; return a; });
 
   let analyser, dataArray;
-  let prevPeak = 0, lastTrigger = 0, running = false;
+  let bgLevel = 0, lastTrigger = 0, running = false;
 
-  const THRESHOLD = 0.04;
-  const COOLDOWN  = 1400;
+  const MULTIPLIER = 3.5;  // 峰值超過背景噪音幾倍才觸發
+  const MIN_PEAK   = 0.05; // 絕對最低門檻（靜音環境用）
+  const COOLDOWN   = 1200;
 
   function getPeak(buf) {
     let peak = 0;
@@ -305,10 +306,13 @@
     requestAnimationFrame(loop);
     analyser.getByteTimeDomainData(dataArray);
     const peak = getPeak(dataArray);
-    const delta = peak - prevPeak;
-    prevPeak = peak;
+
+    // 慢速追蹤背景噪音（自適應）
+    bgLevel = bgLevel * 0.98 + peak * 0.02;
+
     const now = Date.now();
-    if (delta > THRESHOLD && now - lastTrigger > COOLDOWN) {
+    const trigger = Math.max(bgLevel * MULTIPLIER, MIN_PEAK);
+    if (peak > trigger && now - lastTrigger > COOLDOWN) {
       lastTrigger = now;
       playRandom();
     }
